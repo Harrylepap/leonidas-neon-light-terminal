@@ -3,15 +3,16 @@
 # ── ENCODAGE UTF-8 SANS BOM — doit être la toute première instruction ─────────
 # New-Object UTF8Encoding($false) = UTF-8 sans BOM, garantit que les blocs █
 # passent correctement même dans PowerShell 5.1 capturé par Claude Code.
-[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
+try { [Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false) } catch {}
 $OutputEncoding               = New-Object System.Text.UTF8Encoding($false)
 # Le JSON envoyé par Claude Code sur stdin est en UTF-8 (nom de session accentué)
-[Console]::InputEncoding      = New-Object System.Text.UTF8Encoding($false)
 
 $Esc = [char]27
 
 # Read JSON from stdin (Claude Code statusLine API)
-$jsonRaw = [Console]::In.ReadToEnd()
+# Lecture du flux brut en UTF-8 : indépendant de la console (absente en CI) et de son encodage
+$stdinReader = New-Object System.IO.StreamReader([Console]::OpenStandardInput(), (New-Object System.Text.UTF8Encoding($false)))
+$jsonRaw = $stdinReader.ReadToEnd()
 $json = $null
 try { $json = $jsonRaw | ConvertFrom-Json } catch {}
 
