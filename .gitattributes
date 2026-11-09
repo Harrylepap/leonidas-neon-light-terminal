@@ -1,4 +1,5 @@
 *.sh   text eol=lf
+*.bash text eol=lf
 *.ps1  text eol=crlf
 *.hlsl text eol=crlf
 *.png  binary
