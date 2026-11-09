@@ -1,0 +1,23 @@
+{
+    "name": "Leonidas - Neon Light",
+    "background": "#12091F",
+    "foreground": "#F9E6F0",
+    "cursorColor": "#FF4FA3",
+    "selectionBackground": "#FCAF17",
+    "black": "#1A0F2B",
+    "red": "#FF3D6E",
+    "green": "#2EE6A6",
+    "yellow": "#FFB347",
+    "blue": "#4D7CFF",
+    "purple": "#C04DFF",
+    "cyan": "#2BD9E8",
+    "white": "#E6D3E8",
+    "brightBlack": "#6B4A85",
+    "brightRed": "#FF6F91",
+    "brightGreen": "#7CFFCB",
+    "brightYellow": "#FFD36E",
+    "brightBlue": "#7AA2FF",
+    "brightPurple": "#FF5CF0",
+    "brightCyan": "#7DF3FF",
+    "brightWhite": "#FFFFFF"
+}
