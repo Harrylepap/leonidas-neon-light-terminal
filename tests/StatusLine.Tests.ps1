@@ -3,7 +3,9 @@
 
 BeforeAll {
     $script:Script = Join-Path (Split-Path -Parent $PSScriptRoot) 'claude-code\statusline.ps1'
-    $script:Esc = [char]27
+
+    # ESC is rebuilt locally everywhere: no reliance on variables shared across Pester blocks
+    function Get-Esc { [string][char]27 }
 
     function Invoke-StatusLine([string]$json) {
         $in = [IO.Path]::GetTempFileName()
@@ -23,7 +25,9 @@ BeforeAll {
         $out
     }
 
-    function Remove-Ansi([string]$s) { $s -replace "$Esc\[[0-9;]*m", '' }
+    function Remove-Ansi([string]$s) { $s -replace ((Get-Esc) + '\[[0-9;]*m'), '' }
+
+    function Get-Truecolor([int]$r, [int]$g, [int]$b) { [regex]::Escape((Get-Esc) + "[38;2;$r;$g;${b}m") }
 }
 
 Describe 'statusline.ps1' {
@@ -37,7 +41,7 @@ Describe 'statusline.ps1' {
 
     It 'uses neon truecolor escapes instead of the 16 ANSI colors' {
         $out = Invoke-StatusLine '{"model":{"display_name":"Opus Test"}}'
-        $out | Should -Match ([regex]::Escape("$Esc[38;2;255;46;136m") + 'Opus Test')
+        $out | Should -Match ((Get-Truecolor 255 46 136) + 'Opus Test')
     }
 
     It 'draws rate-limit gauges as a per-cell gradient' {
@@ -45,8 +49,8 @@ Describe 'statusline.ps1' {
         $out = Invoke-StatusLine $json
         (Remove-Ansi $out) | Should -Match 'session:█{10} 100%'
         # first cell lagoon, last cell golden yellow
-        $out | Should -Match ([regex]::Escape("$Esc[38;2;43;217;232m█"))
-        $out | Should -Match ([regex]::Escape("$Esc[38;2;252;175;23m█"))
+        $out | Should -Match ((Get-Truecolor 43 217 232) + '█')
+        $out | Should -Match ((Get-Truecolor 252 175 23) + '█')
     }
 
     It 'keeps accented session names intact (UTF-8 stdin)' {
