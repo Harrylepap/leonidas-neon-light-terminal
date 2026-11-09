@@ -23,7 +23,7 @@ BeforeAll {
         [pscustomobject]@{ Dir = $dir; Home = $home_; Wt = $wt }
     }
 
-    function Invoke-Installer($sb, [string[]]$extra = @()) {
+    function Invoke-Installer($sb, [hashtable]$extra = @{}) {
         & $Installer -TargetHome $sb.Home -WindowsTerminalSettings $sb.Wt @extra 6>$null | Out-Null
     }
 
@@ -53,7 +53,7 @@ Describe 'install.ps1' {
     }
 
     It 'skips the shader with -NoShader' {
-        Invoke-Installer $sb @('-NoShader')
+        Invoke-Installer $sb @{ NoShader = $true }
         $wt = Read-Json $sb.Wt
         $wt.profiles.defaults.PSObject.Properties['experimental.pixelShaderPath'] | Should -BeNullOrEmpty
         ($wt.keybindings | Where-Object keys -eq 'ctrl+alt+g') | Should -BeNullOrEmpty
@@ -95,7 +95,7 @@ Describe 'install.ps1' {
 
     It 'leaves skipped components untouched' {
         $before = Get-Content $sb.Wt -Raw
-        Invoke-Installer $sb @('-SkipWindowsTerminal', '-SkipStarship', '-SkipClaudeCode')
+        Invoke-Installer $sb @{ SkipWindowsTerminal = $true; SkipStarship = $true; SkipClaudeCode = $true }
         Get-Content $sb.Wt -Raw | Should -Be $before
         Join-Path $sb.Home '.config\starship.toml' | Should -Not -Exist
     }

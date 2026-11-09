@@ -93,4 +93,5 @@ jobs:
           $cfg.Run.Path = 'tests'
           $cfg.Run.Exit = $true
           $cfg.Output.Verbosity = 'Detailed'
+          $cfg.Output.CIFormat = 'GithubActions'
           Invoke-Pester -Configuration $cfg
