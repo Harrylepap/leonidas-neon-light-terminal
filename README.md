@@ -39,6 +39,16 @@ Companion of the [Leonidas - Neon Light theme for JetBrains IDEs](https://github
 
 ## Install
 
+### Easiest way (no command line)
+
+1. Download **`leonidas-neon-light-terminal-1.0.0.zip`** from the [latest release](https://github.com/Harrylepap/leonidas-neon-light-terminal/releases/latest).
+2. Right-click the zip > *Extract All...*
+3. Double-click **`Install.cmd`** in the extracted folder.
+4. In Windows Terminal: *Settings > Defaults > Appearance > Font face* > **JetBrainsMono Nerd Font**.
+5. Open a new tab.
+
+### From the command line
+
 ```powershell
 git clone https://github.com/Harrylepap/leonidas-neon-light-terminal.git
 cd leonidas-neon-light-terminal

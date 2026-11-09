@@ -3,3 +3,8 @@
 *.ps1  text eol=crlf
 *.hlsl text eol=crlf
 *.png  binary
+*.cmd  text eol=crlf
+tests/    export-ignore
+.github/  export-ignore
+.gitattributes export-ignore
+.gitignore export-ignore
