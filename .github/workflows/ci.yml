@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  static:
+    name: Static checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Validate scheme, palette, shader, encodings
+        run: python tests/validate.py
+
+      - name: Bash syntax
+        run: |
+          bash -n bash/leonidas-neon.bash
+          bash -n starship/build-target.sh
+
+      - name: ShellCheck
+        run: shellcheck --shell=bash bash/leonidas-neon.bash starship/build-target.sh
+
+  starship:
+    name: Starship renders the prompt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install starship
+        run: curl -sS https://starship.rs/install.sh | sh -s -- --yes
+
+      - name: Render prompt with the repository config
+        env:
+          STARSHIP_CONFIG: ${{ github.workspace }}/starship/starship.toml
+          STARSHIP_LOG: warn
+        run: |
+          out=$(starship prompt 2>stderr.txt)
+          cat stderr.txt
+          test -n "$out"
+          ! grep -iE "error|unknown|invalid" stderr.txt
+
+  shader:
+    name: Shader compiles (fxc)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Compile HLSL pixel shader
+        shell: pwsh
+        run: |
+          $fxc = Get-ChildItem 'C:\Program Files (x86)\Windows Kits\10\bin' -Recurse -Filter fxc.exe |
+                 Where-Object FullName -match '\\x64\\' | Sort-Object FullName | Select-Object -Last 1
+          if (-not $fxc) { throw 'fxc.exe not found' }
+          & $fxc.FullName /nologo /T ps_4_0 /E main /Fo shader.cso windows-terminal\leonidas-neon.hlsl
+          if ($LASTEXITCODE -ne 0) { throw "fxc failed with exit code $LASTEXITCODE" }
+
+  pester:
+    name: Pester (${{ matrix.shell }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shell: [ powershell, pwsh ]
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install Pester 5 and PSScriptAnalyzer
+        run: |
+          Set-PSRepository PSGallery -InstallationPolicy Trusted
+          Install-Module Pester -MinimumVersion 5.5 -Scope CurrentUser -Force -SkipPublisherCheck
+          Install-Module PSScriptAnalyzer -Scope CurrentUser -Force
+
+      - name: PSScriptAnalyzer
+        run: |
+          $issues = Invoke-ScriptAnalyzer -Path . -Recurse -Severity Error
+          $issues | Format-Table -AutoSize
+          if ($issues) { throw "$($issues.Count) PSScriptAnalyzer error(s)" }
+
+      - name: Pester tests
+        run: |
+          Import-Module Pester -MinimumVersion 5.5
+          $cfg = New-PesterConfiguration
+          $cfg.Run.Path = 'tests'
+          $cfg.Run.Exit = $true
+          $cfg.Output.Verbosity = 'Detailed'
+          Invoke-Pester -Configuration $cfg

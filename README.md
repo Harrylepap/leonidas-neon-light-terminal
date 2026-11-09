@@ -1,5 +1,7 @@
 # Leonidas - Neon Light · Terminal
 
+[![CI](https://github.com/Harrylepap/leonidas-neon-light-terminal/actions/workflows/ci.yml/badge.svg)](https://github.com/Harrylepap/leonidas-neon-light-terminal/actions/workflows/ci.yml)
+
 A neon-soaked terminal style for Windows, inspired by neon-lit Miami nights: deep purple skies, hot pink signs, sunset orange, lagoon turquoise and golden yellow.
 
 Companion of the [Leonidas - Neon Light theme for JetBrains IDEs](https://github.com/Harrylepap/leonidas-neon-light-theme).
@@ -80,6 +82,15 @@ For PowerShell, add `Invoke-Expression (&starship init powershell)` to your `$PR
 ## Uninstall
 
 Restore the `.bak-<timestamp>` files created by the installer, or pick another color scheme in Windows Terminal settings.
+
+## Tests
+
+```powershell
+python tests/validate.py          # static checks
+Invoke-Pester tests               # installer + status line (Pester 5)
+```
+
+CI also renders the Starship prompt, compiles the shader with `fxc` and runs PSScriptAnalyzer.
 
 ## License
 
